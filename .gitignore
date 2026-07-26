@@ -1,4 +1,6 @@
 # Files
+OverrideSdkPrivateCfg.xml
+SystemConfiguration.xml
 data/devices.json
 data/favorites.json
 

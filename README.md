@@ -2,6 +2,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/hxmelab/basss/blob/master/LICENSE)
 [![GitHub Release](https://img.shields.io/github/release/hxmelab/basss.svg)](https://github.com/hxmelab/basss/releases/latest)
 [![GitHub Downloads](https://img.shields.io/github/downloads/hxmelab/basss/total.svg)](https://github.com/hxmelab/basss/releases)
+
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/O4O4NNOCL)
 
 BASSS is a lightweight, easy-to-use, local, and private alternative designed to rescue Bose SoundTouch speakers from the official cloud server shutdown. 

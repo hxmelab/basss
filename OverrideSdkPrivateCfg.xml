@@ -1,9 +1,0 @@
-<SoundTouchSdkPrivateCfg>
-    <margeServerUrl>http://192.168.68.62:8053/marge</margeServerUrl>
-    <statsServerUrl>http://192.168.68.62:8053</statsServerUrl>
-    <swUpdateUrl>http://192.168.68.62:8053/updates/soundtouch</swUpdateUrl>
-    <isZeroconfEnabled>true</isZeroconfEnabled>
-    <usePandoraProductionServer>true</usePandoraProductionServer>
-    <saveMargeCustomerReport>false</saveMargeCustomerReport>
-    <bmxRegistryUrl>http://192.168.68.62:8053/bmx/registry/v1/services</bmxRegistryUrl>
-</SoundTouchSdkPrivateCfg>
