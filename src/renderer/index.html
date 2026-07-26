@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BASSS Desktop</title>
+  <link rel="stylesheet" href="index.css">
+  <!-- Load Inter font from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <!-- Load FontAwesome icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand" style="justify-content: center; padding-bottom: 20px;">
+        <img src="../../media/basss-icon.png" alt="BASSS Logo" style="height: 48px; object-fit: contain;">
+      </div>
+
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active" data-tab="scanner">
+          <i class="fa-solid fa-globe"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="radio">
+          <i class="fa-solid fa-wifi"></i>
+          <span>Radio Browser</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="favorites">
+          <i class="fa-solid fa-star"></i>
+          <span>Favorites</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="override">
+          <i class="fa-brands fa-usb"></i>
+          <span>Modify</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="logging">
+          <i class="fa-solid fa-terminal"></i>
+          <span>Logging</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="welcome">
+          <span class="nav-icon-unicode" style="color: var(--color-danger);">𝄞</span>
+          <span>About</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-status-title">Status:</div>
+        <div class="footer-status-list" id="sidebar-endpoints">
+          <div class="endpoint-status"><span class="status-dot green"></span>Checking...</div>
+        </div>
+        <div class="footer-status-list" id="sidebar-firewall">
+          <div class="endpoint-status"><span class="status-dot orange"></span>Checking...</div>
+        </div>
+        <span class="version">v1.1.0</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- Tab 1: About -->
+      <section id="tab-welcome" class="tab-view">
+        <header class="view-header">
+          <div>
+            <h2>About</h2>
+            <p>About this app and how you can support the development</p>
+          </div>
+        </header>
+
+        <div class="card glass welcome-card"
+          style="text-align: left; padding: 48px 48px; display: flex; flex-direction: column; gap: 24px; margin-top: 32px; max-width: 850px; line-height: 1.6;">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <h3 style="font-size: 2rem; font-weight: 800; color: var(--color-primary);"><span
+                style="color: var(--color-danger);">𝄢</span> BASSS</h3>
+            <span
+              style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Broadcast
+              App and Server for SoundTouch Speakers</span>
+          </div>
+
+          <!-- Ko-fi Support Box -->
+          <div
+            style="background: rgba(var(--color-primary-rgb), 0.05); border: 1px solid rgba(var(--color-primary-rgb), 0.2); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 8px;">
+            <p style="margin: 0 0 16px 0; font-size: 0.95rem; line-height: 1.5; color: var(--text-primary);">
+              If this app rescued your Bose SoundTouch speakers and saved you the cost of buying new ones, please
+              consider supporting my work. Your donation keeps this app free from ads, with active development and
+              community support!
+            </p>
+            <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+            <script
+              type='text/javascript'>kofiwidget2.init('Donate', '#6b96e0', 'O4O4NNOCL'); kofiwidget2.draw();</script>
+          </div>
+
+          <div style="font-size: 0.95rem; display: flex; flex-direction: column; gap: 16px;">
+            <p>
+              <strong>BASSS</strong> is a lightweight, easy to use, local, and private alternative designed to rescue
+              Bose SoundTouch speakers from the cloud server shutdown.
+            </p>
+            <p>
+              By bypassing the deprecated official cloud server and running entirely on your local home network, BASSS
+              combines a Node.js/Express local server with an elegant Electron
+              desktop frontend to keep your speakers fully operational. Unlike other smart home servers, BASSS does not
+              need to run 24/7.
+            </p>
+
+            <div
+              style="background: rgba(255, 255, 255, 0.02); border-left: 3px solid var(--color-primary); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 8px 0; display: flex; flex-direction: column; gap: 12px;">
+              <p style="margin: 0;">
+                <strong>The Autonomy:</strong> Once configured the speaker resolves the radio stream directly from the
+                web to your speaker without the need of this app. You can safely close the BASSS app.
+              </p>
+              <p style="margin: 0;">
+                <strong>Cold Boot Recovery:</strong> The app is only required if a speaker is completely disconnected
+                from power. When powered back on, it will search for its local configuration. Simply open BASSS for a
+                moment, let the speakers start, and they are fully autonomous once again.
+              </p>
+            </div>
+
+            <p
+              style="font-size: 1rem; font-weight: 700; margin-top: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+              Here is how BASSS delivers an easy-to-use local solution, fully grounded in your speaker’s technical
+              capabilities:
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
+              <div>
+                <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">1. The
+                  Device-Specific Preset Revolution</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 6px;">
+                  In the original Bose cloud architecture, all speakers linked to a user account were forced to share
+                  the same six global presets. BASSS changes this completely by binding presets to individual devices.
+                </p>
+                <p
+                  style="color: var(--text-secondary); font-size: 0.9rem; padding-left: 12px; border-left: 2px solid rgba(255, 255, 255, 0.1);">
+                  <strong>How it works:</strong> When a speaker powers on or asks for its presets, it calls your local
+                  server using its unique physical MAC or Device ID.<br>
+                  <strong>The Benefit:</strong> Instead of returning a global list, this app reads from a local
+                  <code>presets.json</code> file and serves custom, room-specific presets (1–6) tailored to each
+                  individual speaker. This means your "Kitchen" speaker and your "Living Room" speaker can have entirely
+                  different, independent preset lineups.
+                </p>
+              </div>
+
+              <div>
+                <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">2.
+                  Seamless Radio-Browser Integration</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 6px;">
+                  Since official internet radio directory services like TuneIn can fail offline, BASSS integrates with
+                  the free, community-driven radio-browser.info database:
+                </p>
+                <p
+                  style="color: var(--text-secondary); font-size: 0.9rem; padding-left: 12px; border-left: 2px solid rgba(255, 255, 255, 0.1);">
+                  <strong>Favorites:</strong> Users search for worldwide radio stations directly in the app’s Radio
+                  Browser tab and save them to Favorites.<br>
+                  <strong>Stream Resolution:</strong> Within the app, you can easily map any saved favorite to one of
+                  the six preset buttons on a specific speaker. When a speaker requests that preset, your SoundTouch
+                  speaker queries the radio-browser.info API for the active URL and instantly redirects it to the raw
+                  audio stream, no app needed. Easy and stable!
+                </p>
+              </div>
+
+              <div>
+                <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">3.
+                  Desktop Control and Sync via WebSockets</h4>
+                <p style="color: var(--text-secondary); margin-bottom: 6px;">
+                  BASSS acts as a unified desktop control center, utilizing the speaker's built-in local Web Services
+                  API. To ensure that your desktop app's UI matches what is actually happening on your physical
+                  speakers, BASSS establishes an asynchronous WebSocket connection directly to each speaker.
+                </p>
+                <p
+                  style="color: var(--text-secondary); font-size: 0.9rem; padding-left: 12px; border-left: 2px solid rgba(255, 255, 255, 0.1);">
+                  <strong>Instant Updates:</strong> Instead of constantly polling the speakers, BASSS listens for
+                  server-initiated XML updates. Whenever a user adjusts the volume physically, changes a preset, or a
+                  new track starts playing, the speaker pushes a notification (like VolumeChange,
+                  PresetsChangedNotifyUI, or NowPlayingChange). The Electron app instantly parses these updates and
+                  refreshes your dashboard in real-time.
+                </p>
+              </div>
+            </div>
+
+            <div
+              style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px; font-style: italic; line-height: 1.5;">
+              <strong>Legal Disclaimer & Trademark Attribution:</strong> This application is an independent, open-source
+              project. Bose and SoundTouch are trademarks of Bose Corporation. This application is concluded between the
+              developer and the end-user only. Bose Corporation does not in any way endorse, approve of, or sponsor this
+              application.
+            </div>
+
+            <!-- Old Iframe Removed -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 2: Dashboard (Network Scanner) -->
+      <section id="tab-scanner" class="tab-view active">
+        <header class="view-header">
+          <div>
+            <h2>Local Speakers</h2>
+            <p>Locate physical Bose SoundTouch speakers on the network via SSDP and mDNS</p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn btn-secondary" id="btn-toggle-offline"><i class="fa-solid fa-eye-slash"></i> Hide
+              Offline</button>
+            <button class="btn btn-primary" id="btn-scan"><i class="fa-solid fa-magnifying-glass"></i> Scan
+              Network</button>
+          </div>
+        </header>
+
+        <!-- Scanning Loader -->
+        <div class="scan-loader" id="scan-loader" style="display: none;">
+          <div class="spinner"></div>
+          <p>Sending SSDP and mDNS discovery queries on all interfaces...</p>
+          <span class="subtext">Checking port 8090 (API) and port 23 (Telnet)</span>
+        </div>
+
+        <!-- Discovered Speakers Grid -->
+        <div class="devices-grid" id="discovered-devices">
+          <div class="empty-state">
+            <i class="fa-solid fa-network-wired"></i>
+            <h3>No Scan Conducted</h3>
+            <p>Click "Refresh" to search for Bose SoundTouch devices in your local subnet or VPN.</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Tab 4: Modify -->
+      <section id="tab-override" class="tab-view">
+        <header class="view-header">
+          <div>
+            <h2>Modify SoundTouch Speaker</h2>
+            <p>Generate configuration files that point actual Bose speakers to this app.</p>
+          </div>
+        </header>
+
+        <div class="modify-wizard-container"
+          style="display: flex; flex-direction: column; gap: 24px; max-width: 800px; margin: 0 auto; width: 100%; padding-bottom: 40px;">
+
+          <!-- Step 1: USB Stick -->
+          <div class="card glass wizard-card">
+            <div class="wizard-step-header">
+              <span class="step-badge">1</span>
+              <h3>Prepare USB Stick</h3>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9rem;">
+              Bose SoundTouch speakers require an empty file named <code>remote_services</code> on a USB drive to enable
+              Telnet access during reboot.
+            </p>
+            <div style="margin-top: 16px; display: flex; align-items: center; gap: 16px;">
+              <button class="btn btn-primary" id="btn-create-usb"><i class="fa-brands fa-usb"></i> Create USB Stick
+                File</button>
+              <span id="usb-status"
+                style="font-size: 0.85rem; color: var(--color-success); font-family: var(--font-family-mono);"></span>
+            </div>
+          </div>
+
+          <!-- Step 2: Reboot Device Hint -->
+          <div class="card glass wizard-card">
+            <div class="wizard-step-header">
+              <span class="step-badge">2</span>
+              <h3>Prepare Bose Speaker and attach USB Stick</h3>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem;">
+              💡 <strong>Instruction:</strong> Unplug the power cable of your Bose SoundTouch speaker, insert the USB
+              stick containing the <code>remote_services</code> file into the USB port on the back of the speaker, and
+              plug the power cable back in. The speaker will reboot with Telnet enabled.
+            </p>
+          </div>
+
+          <!-- Step 3: Select Endpoints -->
+          <div class="card glass wizard-card">
+            <div class="wizard-step-header">
+              <span class="step-badge">3</span>
+              <h3>Select Configuration Endpoints</h3>
+            </div>
+            <div class="form-row" style="display: flex; gap: 20px; margin-top: 16px;">
+              <div class="form-group" style="flex: 1;">
+                <label for="select-server-address">Server Address (Host/IP)</label>
+                <select id="select-server-address" style="width: 100%;">
+                  <!-- Dynamically populated, excluding loopback -->
+                </select>
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label for="select-target-speaker">Target SoundTouch Speaker</label>
+                <select id="select-target-speaker" style="width: 100%;">
+                  <!-- Dynamically populated from network scan -->
+                  <option value="">No speakers discovered. Run Dashboard scan first.</option>
+                </select>
+              </div>
+            </div>
+            <p style="margin-top: 14px; color: var(--text-muted); font-size: 0.8rem; line-height: 1.5;">
+              💡 <strong>Tip:</strong> IP addresses in local networks can change over time. It is highly recommended to
+              prefer the hostname option (e.g. <code>.local</code> or <code>.fritz.box</code>). You can verify if it is
+              active using the host check indicator on the bottom left.<br>
+              ⚠️ <strong>Important for FRITZ!Box users:</strong> Make sure to select the hostname ending in
+              <code>.fritz.box</code>. The <code>.local</code> ending often does not work on FRITZ!Boxes, even if it is
+              shown as green in the status list!
+            </p>
+          </div>
+
+          <!-- Step 4: Perform Modification -->
+          <div class="card glass wizard-card">
+            <div class="wizard-step-header">
+              <span class="step-badge">4</span>
+              <h3>Perform Speaker Modification</h3>
+            </div>
+            <p style="margin-top: 8px; color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem;">
+              Clicking the button below will automatically generate the required XML configuration file and initiate a
+              connection to copy it to the selected speaker. After rebooting the speaker, it will redirect all
+              registration and
+              stats requests from the speaker to your local server instead of Bose's official cloud.
+            </p>
+            <p style="margin-top: 8px; color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem;">
+              During this process,
+              a randomly generated <code>accountId</code> is transferred to the speaker's
+              <code>SystemConfigurationDB.xml</code>.
+              To keep everything safe, the original <code>SystemConfigurationDB.xml</code> is backed up on
+              the device itself. All modifications can be reverted!
+            </p>
+            <p
+              style="margin-top: 14px; color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+              🛡️ <strong>Safe Process:</strong> There is no risk of breaking anything. Since the official Bose servers
+              have been discontinued, even a misconfiguration will have no negative impact, and you can repeat this
+              setup at any time. <br> <br>
+              Kudos to the developers at Bose for leaving this backdoor open, which makes performing this modification
+              quite easy!
+            </p>
+            <div style="margin-top: 20px;">
+              <button class="btn btn-primary" id="btn-perform-modification" disabled
+                style="padding: 12px 24px; font-size: 0.95rem;"><i class="fa-solid fa-wand-magic-sparkles"></i> Perform
+                Modification</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Tab 4.5: Radio Browser -->
+      <section id="tab-radio" class="tab-view">
+        <header class="view-header">
+          <div>
+            <h2 id="btn-reset-radio" style="cursor: pointer; display: inline-block; transition: opacity 0.2s;"
+              onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">Radio Browser</h2>
+            <p>Browse to station details page by searching one and click the star to save it to your favorites.</p>
+          </div>
+          <button class="btn btn-secondary" id="btn-favorite-browser" disabled
+            style="background-color: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.3); color: #fcd34d;">
+            <i class="fa-regular fa-star"></i> Favorite
+          </button>
+        </header>
+
+        <div class="webview-container card glass"
+          style="flex-grow: 1; padding: 0; overflow: hidden; height: calc(100vh - 200px); border: 1px solid var(--border-color);">
+          <webview id="radio-browser-webview" src="https://www.radio-browser.info/"
+            style="width: 100%; height: 100%; border: none; background: #fff;"></webview>
+        </div>
+      </section>
+
+      <!-- Tab 4.6: Favorites -->
+      <section id="tab-favorites" class="tab-view">
+        <header class="view-header">
+          <div>
+            <h2>Favorites</h2>
+            <p>Your saved radio stations from the Radio Browser API</p>
+          </div>
+        </header>
+
+        <div class="favorites-container card glass"
+          style="flex-grow: 1; padding: 24px; overflow-y: auto; height: calc(100vh - 200px);">
+          <div class="favorites-list" id="favorites-list-container"
+            style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Dynamically populated favorites -->
+            <div class="empty-state">
+              <i class="fa-solid fa-star"></i>
+              <h3>No Favorites Yet</h3>
+              <p>Go to the Radio Browser tab, navigate to a station detail page, and add it to your favorites!</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 5: Logging -->
+      <section id="tab-logging" class="tab-view">
+        <header class="view-header">
+          <div>
+            <h2>Logging</h2>
+            <p>Real-time system events, request records, and backend logs</p>
+          </div>
+        </header>
+
+        <!-- Terminal Console Logger -->
+        <div class="card glass terminal-card"
+          style="flex-grow: 1; display: flex; flex-direction: column; height: calc(100vh - 200px); padding: 0; overflow: hidden;">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <span class="terminal-title">Logging</span>
+            <button class="clear-terminal-btn" id="clear-logs"><i class="fa-solid fa-trash-can"></i> Clear</button>
+          </div>
+          <div class="terminal-body" id="server-logs">
+            <div class="log-line system">💡 Listening for Express server events...</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Preset Selector Modal -->
+  <div class="modal-overlay" id="preset-select-modal" style="display: none;">
+    <div class="modal-card card glass" style="max-width: 600px; width: 90%;">
+      <div class="modal-header"
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3><i class="fa-solid fa-star"></i> Select Favorite Station</h3>
+        <button class="btn-icon" id="btn-close-preset-modal"
+          style="background: transparent; border: none; font-size: 1.25rem; color: var(--text-secondary); cursor: pointer;"><i
+            class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="max-height: 400px; overflow-y: auto; padding-right: 8px;">
+        <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 0.85rem;">Choose a saved favorite to
+          assign to this preset button:</p>
+        <div class="favorites-list" id="modal-favorites-list" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Dynamically populated favorites -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Telnet Deployment Overlay Modal -->
+  <div class="modal-overlay" id="deploy-modal" style="display: none;">
+    <div class="modal-card card glass">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-terminal"></i> Telnet Deployment Console</h3>
+      </div>
+      <div class="modal-body">
+        <p>Transferring override configurations to Bose SoundTouch hardware speaker...</p>
+        <div class="deploy-terminal" id="deploy-terminal">
+          <!-- Live progress lines -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-close-deploy" disabled>Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- USB Stick Folder Selection Modal -->
+  <div class="modal-overlay" id="usb-modal" style="display: none;">
+    <div class="modal-card card glass" style="max-width: 500px; width: 90%;">
+      <div class="modal-header"
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3><i class="fa-brands fa-usb"></i> Create remote_services File</h3>
+        <button class="btn-icon" id="btn-close-usb-modal"
+          style="background: transparent; border: none; font-size: 1.25rem; color: var(--text-secondary); cursor: pointer;"><i
+            class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 20px;">
+          Select your USB drive's root directory. We will write an empty file named <code>remote_services</code> into
+          it.
+        </p>
+        <div
+          style="background: rgba(0,0,0,0.25); border: 1px dashed var(--border-color); padding: 12px; border-radius: 6px; font-family: var(--font-family-mono); font-size: 0.8rem; margin-bottom: 20px; word-break: break-all; color: var(--color-primary);"
+          id="selected-usb-path">
+          No directory selected yet...
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary" id="btn-cancel-usb">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-usb" disabled>Confirm / Create</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+
+</html>

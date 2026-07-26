@@ -1,0 +1,83 @@
+{
+  "name": "basss",
+  "version": "1.0.0",
+  "description": "BASSS (Broadcast App and Server for SoundTouch Speakers) is a lightweight, easy to use, local, and private alternative designed to rescue Bose SoundTouch speakers from the cloud server shutdown.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "electron": "electron .",
+    "build": "electron-builder",
+    "build:dir": "electron-builder --dir",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac"
+  },
+  "keywords": [
+    "bose",
+    "soundtouch",
+    "radio",
+    "broadcast",
+    "music",
+    "stream",
+    "api",
+    "app",
+    "desktop",
+    "electron",
+    "server",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "fast-xml-parser": "^5.10.1"
+  },
+  "devDependencies": {
+    "electron": "^43.1.1",
+    "electron-builder": "^24.13.3"
+  },
+  "overrides": {
+    "tar": "^7.5.22",
+    "brace-expansion": "^5.0.8",
+    "builder-util-runtime": "^9.7.0"
+  },
+  "build": {
+    "appId": "com.homelab.basss",
+    "productName": "BASSS",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "media/basss-icon.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "mac": {
+      "icon": "media/basss-icon.png",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "media/**/*",
+      "src/**/*",
+      "data/**/*"
+    ]
+  }
+}

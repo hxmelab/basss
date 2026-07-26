@@ -1,0 +1,9 @@
+<SoundTouchSdkPrivateCfg>
+    <margeServerUrl>{server}/marge</margeServerUrl>
+    <statsServerUrl>{server}</statsServerUrl>
+    <swUpdateUrl>{server}/updates/soundtouch</swUpdateUrl>
+    <isZeroconfEnabled>true</isZeroconfEnabled>
+    <usePandoraProductionServer>true</usePandoraProductionServer>
+    <saveMargeCustomerReport>false</saveMargeCustomerReport>
+    <bmxRegistryUrl>{server}/bmx/registry/v1/services</bmxRegistryUrl>
+</SoundTouchSdkPrivateCfg>

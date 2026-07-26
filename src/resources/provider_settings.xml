@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<providerSettings>
+  <providerSetting>
+    <boseId>{BOSE_ID}</boseId>
+    <keyName>ELIGIBLE_FOR_TRIAL</keyName>
+    <value>true</value>
+    <providerId>14</providerId>
+  </providerSetting>
+</providerSettings>

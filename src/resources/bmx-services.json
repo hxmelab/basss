@@ -1,0 +1,71 @@
+{
+  "_links": {
+    "bmx_services_availability": {
+      "href": "../servicesAvailability"
+    }
+  },
+  "askAgainAfter": 1230482,
+  "bmx_services": [
+    {
+      "_links": {
+        "bmx_token": { "href": "/token" },
+        "self": { "href": "/" }
+      },
+      "askAdapter": false,
+      "assets": {
+        "color": "#000000",
+        "description": "Custom radio stations with BMX.",
+        "icons": {
+          "largeSvg": "{BASE_URL}/media/orion-monochrome.svg",
+          "monochromePng": "{BASE_URL}/media/orion-monochrome_v2.png",
+          "monochromeSvg": "{BASE_URL}/media/orion-monochrome.svg",
+          "smallSvg": "{BASE_URL}/media/orion-monochrome.svg"
+        },
+        "name": "Custom Stations"
+      },
+      "baseUrl": "{BASE_URL}/core02/svc-bmx-adapter-orion/prod/orion",
+      "streamTypes": ["liveRadio"],
+      "authenticationModel": {
+        "anonymousAccount": {
+          "autoCreate": true,
+          "enabled": true
+        }
+      },
+      "id": {
+        "name": "LOCAL_INTERNET_RADIO",
+        "value": 11
+      }
+    },
+    {
+      "_links": {
+        "bmx_navigate": { "href": "/v1/navigate" },
+        "bmx_token": { "href": "/v1/token" },
+        "self": { "href": "/" }
+      },
+      "askAdapter": false,
+      "assets": {
+        "color": "#000000",
+        "description": "RadioBrowser is an open source internet radio directory. It provides access to thousands of internet radio stations worldwide. RadioBrowser is community driven and relies on user contributions to keep the station database up to date.",
+        "icons": {
+          "largeSvg": "{BASE_URL}/media/tunein-monochromeSvg.svg",
+          "monochromePng": "{BASE_URL}/media/tunein-monochromePng.png",
+          "monochromeSvg": "{BASE_URL}/media/tunein-monochromeSvg.svg",
+          "smallSvg": "{BASE_URL}/media/tunein-smallSvg.svg"
+        },
+        "name": "RadioBrowser"
+      },
+      "baseUrl": "https://all.api.radio-browser.info/soundtouch",
+      "streamTypes": ["liveRadio", "onDemand"],
+      "authenticationModel": {
+        "anonymousAccount": {
+          "autoCreate": true,
+          "enabled": true
+        }
+      },
+      "id": {
+        "name": "RADIO_BROWSER",
+        "value": 39
+      }
+    }
+  ]
+}

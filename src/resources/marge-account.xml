@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<account id="{ACCOUNT_ID}">
+   <accountStatus>OK</accountStatus>
+   <devices>
+      <device deviceid="{DEVICE_ID}">
+         <attachedProduct product_code="{PRODUCT_CODE}">
+            <components />
+            <productlabel>{PRODUCT_LABEL}</productlabel>
+            <serialnumber>{SYSTEM_SERIAL_NUMBER}</serialnumber>
+         </attachedProduct>
+         <createdOn>{DEVICE_CREATED_ON}</createdOn>
+         <firmwareVersion>{FIRMWARE_VERSION}</firmwareVersion>
+         <ipaddress>{IP_ADDRESS}</ipaddress>
+         <name>{DEVICE_NAME}</name>
+         <presets>
+{PRESETS_XML}
+         </presets>
+         <recents />
+         <serialnumber>{SERIAL_NUMBER}</serialnumber>
+         <updatedOn>{DEVICE_UPDATED_ON}</updatedOn>
+      </device>
+   </devices>
+   <mode>global</mode>
+   <preferredLanguage>en</preferredLanguage>
+   <providerSettings>
+      <providerSetting>
+         <boseId>{ACCOUNT_ID}</boseId>
+         <keyName>ELIGIBLE_FOR_TRIAL</keyName>
+         <value>true</value>
+         <providerId>14</providerId>
+      </providerSetting>
+   </providerSettings>
+   <sources>
+      <source id="112345" type="Audio">
+         <createdOn>2026-06-29T16:13:03.003+00:00</createdOn>
+         <credential type="" />
+         <name>AUX</name>
+         <sourceproviderid>9</sourceproviderid>
+         <sourcename>AUX IN</sourcename>
+         <sourceSettings />
+         <updatedOn>2026-06-29T16:13:03.003+00:00</updatedOn>
+         <username>AUX</username>
+      </source>
+      <source id="112346" type="Audio">
+         <createdOn>2026-06-29T16:13:03.003+00:00</createdOn>
+         <credential type="token" />
+         <name />
+         <sourceproviderid>2</sourceproviderid>
+         <sourcename>INTERNET RADIO</sourcename>
+         <sourceSettings />
+         <updatedOn>2026-06-29T16:13:03.003+00:00</updatedOn>
+         <username />
+      </source>
+      <source id="112347" type="Audio">
+         <createdOn>2026-06-29T16:13:03.003+00:00</createdOn>
+         <credential type="token" />
+         <name />
+         <sourceproviderid>11</sourceproviderid>
+         <sourcename>LOCAL_INTERNET RADIO</sourcename>
+         <sourceSettings />
+         <updatedOn>2026-06-29T16:13:03.003+00:00</updatedOn>
+         <username />
+      </source>
+      <source id="112348" type="Audio">
+         <createdOn>2026-06-29T16:13:03.003+00:00</createdOn>
+         <credential type="token" />
+         <name />
+         <sourceproviderid>25</sourceproviderid>
+         <sourcename />
+         <sourceSettings />
+         <updatedOn>2026-06-29T16:13:03.003+00:00</updatedOn>
+         <username />
+      </source>
+   </sources>
+</account>

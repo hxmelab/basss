@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<SystemConfiguration>
+    <Password />
+    <DeviceName>{name}</DeviceName>
+    <AccountAssociatedEMail></AccountAssociatedEMail>
+    <AccountUUID>{accountId}</AccountUUID>
+    <Locale />
+    <acctMode>global</acctMode>
+    <isMultiDeviceAccount>false</isMultiDeviceAccount>
+    <margeAuthServerToken />
+    <powerSavingSettings powersaving_en="true" />
+</SystemConfiguration>
