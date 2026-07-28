@@ -19,7 +19,10 @@ Unlike other smart home servers, **BASSS does not need to run 24/7**. Once confi
 ![BASSS Dashboard](media/screenshot-dashboard.png)
 
 ### 2. Radio Browser & Favorites
-![Radio Browser](media/screenshot-radio.png)
+![Radio Browser 1](media/screenshot-radio-1.png)
+![Radio Browser 2](media/screenshot-radio-2.png)
+![Radio Browser 3](media/screenshot-radio-3.png)
+![Radio Browser 4](media/screenshot-radio-4.png)
 
 ### 3. Modification Wizard
 ![Modification Wizard](media/screenshot-modify.png)
@@ -85,6 +88,65 @@ BASSS uses `electron-builder` to package standalone executable packages.
 
 ---
 
+## Server & Command Line Modification
+
+BASSS can also run purely as a server via the command line, for example on a Raspberry Pi. Likewise, it is possible to modify the SoundTouch speakers using the terminal.
+
+### 1. Running the Server with PM2 (Headless Linux)
+
+If you want to host BASSS on a Linux server (e.g., Debian or Raspberry Pi OS) without the desktop interface, you can run only the Express backend.
+
+#### Prerequisites
+Make sure Node.js (v16+) and npm are installed on your Linux machine, and port `8053` is opened in your firewall:
+```bash
+sudo ufw allow 8053/tcp
+```
+
+#### Setup and Start
+1. Clone the repository and install only the production dependencies (omitting Electron):
+   ```bash
+   npm install --production
+   ```
+2. To keep the server running 24/7 in the background, I recommend using **PM2**:
+   ```bash
+   # Install PM2 globally
+   sudo npm install -g pm2
+
+   # Start the BASSS backend server
+   pm2 start src/server.js --name "basss-server"
+
+   # Ensure PM2 starts automatically on system boot
+   pm2 startup
+   pm2 save
+   ```
+
+### 2. Modifying SoundTouch Speakers via CLI
+
+You can perform the speaker redirection wizard directly from the command line using the helper script located in `src/modify.js`.
+
+#### Script Configuration
+Before running the script, open [src/modify.js](file:///c:/Code/github/basss/src/modify.js) in a text editor and adjust the parameters at the top of the file to match your network setup:
+
+```javascript
+// ==========================================================================
+// CONFIGURATION PARAMETERS
+// ==========================================================================
+const NAME = "SoundTouch";          // Name of the Bose speaker
+const SPEAKER = "192.168.0.53";    // IP address of the Bose speaker
+const SERVER = "raspi.fritz.box";   // IP/Hostname of your BASSS server
+const PORT = 8053;                  // Port of your BASSS server
+// ==========================================================================
+```
+
+#### Running the Script
+Execute the script using Node.js:
+```bash
+node src/modify.js
+```
+The script will dynamically generate a random 7-digit Account UUID, connect to the speaker via Telnet (port 23), back up the original `SystemConfigurationDB.xml` to `SystemConfiguration.bak`, write the redirect files to the speaker, and trigger a reboot to apply the changes.
+
+---
+
 ## Technical Details & Architecture
 
 ```
@@ -102,6 +164,7 @@ BASSS/
 │   ├── datastore.js       # Persistent file-based JSON storage controller
 │   ├── discovery.js       # SSDP & mDNS speaker scanner
 │   ├── routes.js          # REST endpoints emulating the Bose Marge API
+│   ├── modify.js          # CLI script to automate speaker redirection
 │   ├── server.js          # Express backend server with startup health-checks
 │   └── service.js         # SoundTouch business logic and XML builders
 ├── main.js                # Electron main process (system window, IPC router, DNS checks)
