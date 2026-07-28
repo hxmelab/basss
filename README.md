@@ -47,11 +47,11 @@ Unlike other smart home servers, **BASSS does not need to run 24/7**. Once confi
 
 ### On Windows
 Just download and run `BASSS-Desktop.exe` on Windows. A confirmation dialog will appear asking you to allow access to run the local server on port 8053. 
-* [Download BASSS for Windows 64-bit](https://github.com/hxmelab/basss/releases/download/v1.0.0/BASSS-Desktop.exe)
+* [Download BASSS for Windows 64-bit](https://github.com/hxmelab/basss/releases/download/v1.0.0/BASSS.1.0.0.exe)
 
 ### On MacOS
 Download `BASSS-Desktop.dmg` and run the app on macOS. MacOS will warn you that it's an unknown publisher. Due to this open source project being unsigned, you will have to allow it to run.
-* [Download BASSS for macOS 64-bit](https://github.com/hxmelab/basss/releases/download/v1.0.0/BASSS-Desktop.dmg)
+* [Download BASSS for macOS 64-bit](https://github.com/hxmelab/basss/releases/download/v1.0.0/BASSS-1.0.0-arm64.dmg)
 
 ## Developer Guide
 
