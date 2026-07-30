@@ -697,7 +697,7 @@ async function getRadioBrowserServers() {
         .sort(() => Math.random() - 0.5);
     }
   } catch (err) {
-    console.warn('[RadioBrowser] DNS SRV resolution failed, using fallback list:', err.message);
+    // DNS SRV resolution is optional; silence warning to keep logs clean
   }
 
   return fallbackServers.sort(() => Math.random() - 0.5);
@@ -773,13 +773,12 @@ ipcMain.handle('add-favorite-by-uuid', async (event, uuid) => {
   for (const server of servers) {
     const url = `https://${server}${path}`;
     try {
-      console.log(`[RadioBrowser] Fetching favorite from ${server}...`);
       stationData = await fetchJson(url);
       if (stationData) {
+        console.log(`[RadioBrowser] Successfully fetched favorite from ${server}`);
         break;
       }
     } catch (err) {
-      console.warn(`[RadioBrowser] Failed to fetch from ${server}:`, err.message);
       lastError = err;
     }
   }

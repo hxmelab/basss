@@ -656,6 +656,9 @@ function checkRadioBrowserUrl(url) {
 }
 
 if (webview) {
+  // Set the initial source programmatically to prevent the GUEST_VIEW_MANAGER_CALL race condition error on startup
+  webview.src = "https://www.radio-browser.info/";
+
   webview.addEventListener('did-navigate', (event) => {
     checkRadioBrowserUrl(event.url);
   });

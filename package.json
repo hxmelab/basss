@@ -1,6 +1,10 @@
 {
   "name": "basss",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hxmelab/basss.git"
+  },
   "description": "BASSS (Broadcast App and Server for SoundTouch Speakers) is a lightweight, easy to use, local, and private alternative designed to rescue Bose SoundTouch speakers from the cloud server shutdown.",
   "main": "main.js",
   "scripts": {
@@ -45,6 +49,9 @@
     "productName": "BASSS",
     "directories": {
       "output": "dist"
+    },
+    "publish": {
+      "provider": "github"
     },
     "win": {
       "icon": "media/basss-icon.png",

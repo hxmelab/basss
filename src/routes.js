@@ -402,7 +402,7 @@ function setupRoutes(app, service) {
     }
 
     res.json({
-      askAgainAfter: 1230482,
+      askAgainAfter: 864000000,
       bmx_services: []
     });
   });

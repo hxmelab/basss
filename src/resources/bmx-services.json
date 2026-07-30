@@ -4,12 +4,16 @@
       "href": "../servicesAvailability"
     }
   },
-  "askAgainAfter": 1230482,
+  "askAgainAfter": 864000000,
   "bmx_services": [
     {
       "_links": {
-        "bmx_token": { "href": "/token" },
-        "self": { "href": "/" }
+        "bmx_token": {
+          "href": "/token"
+        },
+        "self": {
+          "href": "/"
+        }
       },
       "askAdapter": false,
       "assets": {
@@ -24,7 +28,9 @@
         "name": "Custom Stations"
       },
       "baseUrl": "{BASE_URL}/core02/svc-bmx-adapter-orion/prod/orion",
-      "streamTypes": ["liveRadio"],
+      "streamTypes": [
+        "liveRadio"
+      ],
       "authenticationModel": {
         "anonymousAccount": {
           "autoCreate": true,
@@ -38,9 +44,15 @@
     },
     {
       "_links": {
-        "bmx_navigate": { "href": "/v1/navigate" },
-        "bmx_token": { "href": "/v1/token" },
-        "self": { "href": "/" }
+        "bmx_navigate": {
+          "href": "/v1/navigate"
+        },
+        "bmx_token": {
+          "href": "/v1/token"
+        },
+        "self": {
+          "href": "/"
+        }
       },
       "askAdapter": false,
       "assets": {
@@ -55,7 +67,10 @@
         "name": "RadioBrowser"
       },
       "baseUrl": "https://all.api.radio-browser.info/soundtouch",
-      "streamTypes": ["liveRadio", "onDemand"],
+      "streamTypes": [
+        "liveRadio",
+        "onDemand"
+      ],
       "authenticationModel": {
         "anonymousAccount": {
           "autoCreate": true,

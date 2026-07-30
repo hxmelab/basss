@@ -2,6 +2,12 @@
 
 All notable changes to the **BASSS** project will be documented in this file.
 
+## [1.0.1] - 2026-07-30
+
+- Increase the BMX Registry `askAgainAfter` polling interval to `864000000` milliseconds (10 days) to avoid frequent registry requests.
+- Prevent `GUEST_VIEW_MANAGER_CALL` (`ERR_ABORTED`) error on startup by loading the Radio Browser webview programmatically in `renderer.js` instead of using the inline HTML `src` attribute.
+- Silence verbose warning and retry logs from the Radio Browser API server fallback pool to keep the console output clean.
+
 ## [1.0.0] - 2026-07-24
 
 Initial release of **BASSS (Broadcast App and Server for SoundTouch Speakers)** – a lightweight, easy to use, local, and private alternative designed to rescue Bose SoundTouch speakers from the cloud server shutdown.

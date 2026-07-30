@@ -96,11 +96,22 @@ BASSS can also run purely as a server via the command line, for example on a Ras
 
 If you want to host BASSS on a Linux server (e.g., Debian or Raspberry Pi OS) without the desktop interface, you can run only the Express backend.
 
-#### Prerequisites
-Make sure Node.js (v16+) and npm are installed on your Linux machine, and port `8053` is opened in your firewall:
-```bash
-sudo ufw allow 8053/tcp
-```
+Make sure Node.js (v16+) and npm are installed on your Linux machine. 
+
+If your Linux system has a firewall active, you must open port `8053` (note that on a default Debian/Raspberry Pi OS installation, no firewall is active by default, so ports are already open and you can skip this):
+
+* If you are using **UFW** (install with `sudo apt install ufw` if missing):
+  ```bash
+  sudo ufw allow 8053/tcp
+  ```
+* If you are using **iptables** (install with `sudo apt install iptables` if missing):
+  ```bash
+  sudo iptables -A INPUT -p tcp --dport 8053 -j ACCEPT
+  ```
+* If you are using **nftables** (default on modern Debian):
+  ```bash
+  sudo nft add rule inet filter input tcp dport 8053 accept
+  ```
 
 #### Setup and Start
 1. Clone the repository and install only the production dependencies (omitting Electron):
