@@ -490,6 +490,19 @@ ipcMain.handle('get-emulation-data', async () => {
 });
 
 
+// Get a path to a writable file, storing it in the user's data directory if the app is packaged
+// to prevent write failures inside the read-only ASAR package.
+function getWritablePath(filename) {
+  const isPackaged = app.isPackaged;
+  const dataDir = isPackaged 
+    ? path.join(app.getPath('userData'), 'data') 
+    : path.join(__dirname, 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  return path.join(dataDir, filename);
+}
+
 // Generate Override Config XML File
 ipcMain.handle('generate-override-file', async (event, { targetHost }) => {
   const port = PORT; // Use running backend server port automatically!
@@ -500,14 +513,14 @@ ipcMain.handle('generate-override-file', async (event, { targetHost }) => {
   let xmlContent = fs.readFileSync(templatePath, 'utf8');
   xmlContent = xmlContent.replace(/\{server\}/g, `http://${targetHost}:${port}`);
 
-  const filePath = path.join(__dirname, 'OverrideSdkPrivateCfg.xml');
+  const filePath = getWritablePath('OverrideSdkPrivateCfg.xml');
   fs.writeFileSync(filePath, xmlContent, 'utf8');
   return { filePath, xmlContent, host: targetHost };
 });
 
 // Deploy Override XML via Telnet
 ipcMain.handle('deploy-override', async (event, { targetIp, deviceId, name, type }) => {
-  const overridePath = path.join(__dirname, 'OverrideSdkPrivateCfg.xml');
+  const overridePath = getWritablePath('OverrideSdkPrivateCfg.xml');
   const sysConfigTemplatePath = path.join(__dirname, 'src/resources/SystemConfiguration.xml');
 
   if (!fs.existsSync(overridePath)) {
@@ -526,8 +539,8 @@ ipcMain.handle('deploy-override', async (event, { targetIp, deviceId, name, type
     .replace(/\{name\}/g, name)
     .replace(/\{accountId\}/g, accountId);
 
-  // Write SystemConfiguration.xml to the main directory
-  const sysConfigPath = path.join(__dirname, 'SystemConfiguration.xml');
+  // Write SystemConfiguration.xml to the writable user data directory
+  const sysConfigPath = getWritablePath('SystemConfiguration.xml');
   fs.writeFileSync(sysConfigPath, sysConfigXml, 'utf8');
 
   const overrideXml = fs.readFileSync(overridePath, 'utf8');
@@ -747,14 +760,7 @@ function fetchJson(url, options = {}) {
 }
 
 function getFavoritesPath() {
-  const isPackaged = app.isPackaged;
-  const dataDir = isPackaged 
-    ? path.join(app.getPath('userData'), 'data') 
-    : path.join(__dirname, 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  return path.join(dataDir, 'favorites.json');
+  return getWritablePath('favorites.json');
 }
 
 ipcMain.handle('add-favorite-by-uuid', async (event, uuid) => {

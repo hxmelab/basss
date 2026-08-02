@@ -2,6 +2,10 @@
 
 All notable changes to the **BASSS** project will be documented in this file.
 
+## [1.0.2] - 2026-08-02
+
+- Fix file write failures (ENOENT) in compiled standalone builds on Windows, macOS, and Linux by storing generated speaker configuration files (`OverrideSdkPrivateCfg.xml` and `SystemConfiguration.xml`) in the writable user data directory instead of the read-only ASAR package.
+
 ## [1.0.1] - 2026-07-30
 
 - Increase the BMX Registry `askAgainAfter` polling interval to `864000000` milliseconds (10 days) to avoid frequent registry requests.

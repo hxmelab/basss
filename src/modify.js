@@ -9,7 +9,7 @@
 // CONFIGURATION PARAMETERS
 // ==========================================================================
 const NAME = "SoundTouch";          // Name of the Bose speaker
-const SPEAKER = "192.168.0.53";    // IP address of the Bose speaker
+const SPEAKER = "192.168.0.27";    // IP address of the Bose speaker
 const SERVER = "raspi.fritz.box";     // IP/Hostname of your BASSS server
 const PORT = 8053;                  // Port of your BASSS server
 // ==========================================================================
