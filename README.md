@@ -47,11 +47,24 @@ Unlike other smart home servers, **BASSS does not need to run 24/7**. Once confi
 
 ### On Windows
 Just download and run `BASSS-<version>.exe` on Windows. Windows will warn you that it's an unknown publisher. Due to this open source project being unsigned, you will have to click on "More info" and then "Run anyway". After that a confirmation dialog will appear asking you to allow access to run the local server on port 8053.
+
 * [Download BASSS for Windows 64-bit](https://github.com/hxmelab/basss/releases)
 
-### On MacOS
-Download `BASSS-<version>-arm64.dmg` and run the app on macOS. MacOS will warn you that it's an unknown publisher. Due to this open source project being unsigned, you will have to allow it to run.
-* [Download BASSS for macOS 64-bit](https://github.com/hxmelab/basss/releases)
+### On macOS
+Download `BASSS-<version>-arm64.dmg` (for Apple Silicon Macs) or the Intel version (if you are on an Intel Mac).
+
+Since this is an open-source project and is not signed/notarized with a paid Apple Developer account ($99/year), macOS Gatekeeper will block it by default. When you try to run it after dragging it to the Applications folder, macOS will show a warning saying **"BASSS is damaged and can't be opened"** (or *"BASSS ist beschädigt und kann nicht geöffnet werden"*).
+
+To resolve this and run the app:
+1. Open the downloaded `.dmg` file and drag **BASSS** to your **Applications** folder.
+2. Open the **Terminal** app.
+3. Run the following command to remove the macOS quarantine flag:
+   ```bash
+   xattr -cr /Applications/BASSS.app
+   ```
+4. You can now open BASSS normally from your Applications folder or Spotlight.
+
+* [Download BASSS for macOS](https://github.com/hxmelab/basss/releases)
 
 ## Developer Guide
 
