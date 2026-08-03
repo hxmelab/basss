@@ -51,9 +51,7 @@ Just download and run `BASSS-<version>.exe` on Windows. Windows will warn you th
 * [Download BASSS for Windows 64-bit](https://github.com/hxmelab/basss/releases)
 
 ### On macOS
-Download `BASSS-<version>-arm64.dmg` (for Apple Silicon Macs) or the Intel version (if you are on an Intel Mac).
-
-Since this is an open-source project and is not signed/notarized with a paid Apple Developer account ($99/year), macOS Gatekeeper will block it by default. When you try to run it after dragging it to the Applications folder, macOS will show a warning saying **"BASSS is damaged and can't be opened"** (or *"BASSS ist beschädigt und kann nicht geöffnet werden"*).
+Download `BASSS-<version>-arm64.dmg` for macOS. Since this is an open-source project and is not signed with a paid Apple Developer account, macOS Gatekeeper will block it by default. When you try to run it after dragging it to the Applications folder, macOS will show a warning saying **"BASSS is damaged and can't be opened"** (or *"BASSS ist beschädigt und kann nicht geöffnet werden"*).
 
 To resolve this and run the app:
 1. Open the downloaded `.dmg` file and drag **BASSS** to your **Applications** folder.
