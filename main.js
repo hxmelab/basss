@@ -873,6 +873,71 @@ function formatTargetHost(ip) {
   return clean;
 }
 
+// Helper to escape XML special characters
+function escapeXml(unsafe) {
+  if (typeof unsafe !== 'string') return '';
+  return unsafe.replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '\'': return '&apos;';
+      case '"': return '&quot;';
+      default: return c;
+    }
+  });
+}
+
+// IPC Handler to play a favorite station directly on the speaker
+ipcMain.handle('play-speaker-favorite', async (event, { targetIp, name, uuid }) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const host = formatTargetHost(targetIp);
+      if (!host) {
+        return reject(new Error('Invalid or missing IP address'));
+      }
+      const http = require('http');
+      const location = `https://all.api.radio-browser.info/soundtouch/stations/byuuid/${uuid}`;
+      const xml = `<ContentItem source="LOCAL_INTERNET_RADIO" type="stationurl" location="${location}" isPresetable="true">
+  <itemName>${escapeXml(name)}</itemName>
+</ContentItem>`;
+
+      const req = http.request({
+        hostname: host.startsWith('[') ? host.slice(1, -1) : host,
+        port: 8090,
+        path: '/select',
+        method: 'POST',
+        timeout: 2500,
+        headers: {
+          'Content-Type': 'application/xml',
+          'Content-Length': Buffer.byteLength(xml)
+        }
+      }, (response) => {
+        let body = '';
+        response.on('data', chunk => body += chunk);
+        response.on('end', () => {
+          if (response.statusCode >= 200 && response.statusCode < 300) {
+            resolve(body);
+          } else {
+            reject(new Error(`Speaker select returned status ${response.statusCode}`));
+          }
+        });
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error('Connection timed out'));
+      });
+      req.on('error', reject);
+      req.write(xml);
+      req.end();
+    } catch (err) {
+      reject(err);
+    }
+  });
+});
+
+
 // IPC Handlers for speaker preset reads/writes
 
 ipcMain.handle('get-speaker-presets', async (event, targetIp) => {
@@ -1220,4 +1285,32 @@ ipcMain.handle('check-telnet', async (event, ip) => {
   } catch (e) {
     return { success: false, error: e.message };
   }
+});
+
+ipcMain.handle('delete-device', async (event, deviceId) => {
+  return new Promise((resolve) => {
+    try {
+      const http = require('http');
+      const req = http.request({
+        hostname: 'localhost',
+        port: PORT,
+        path: `/api/devices/${deviceId}`,
+        method: 'DELETE'
+      }, (res) => {
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(body));
+          } catch (e) {
+            resolve({ status: 'error', error: e.message });
+          }
+        });
+      });
+      req.on('error', err => resolve({ status: 'error', error: err.message }));
+      req.end();
+    } catch (err) {
+      resolve({ status: 'error', error: err.message });
+    }
+  });
 });

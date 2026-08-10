@@ -1486,3 +1486,19 @@ a {
 .telnet-icon.closed {
   color: var(--text-muted);
 }
+
+/* Delete device button styling */
+.delete-device-btn {
+  font-size: 1.1rem;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: var(--transition-fast);
+}
+
+.delete-device-btn:hover {
+  color: var(--color-danger);
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.7));
+}

@@ -2,6 +2,11 @@
 
 All notable changes to the **BASSS** project will be documented in this file.
 
+## [1.0.3] - 2026-08-05
+
+- Add a **Play Favorite** feature to the dashboard allowing users to play a saved favorite station directly on a specific speaker without assigning it to a preset.
+- Add a delete (trash can) button to dashboard device cards to delete speaker configuration from `devices.json` and remove the card from the dashboard view.
+
 ## [1.0.2] - 2026-08-02
 
 - Fix file write failures (ENOENT) in compiled standalone builds on Windows, macOS, and Linux by storing generated speaker configuration files (`OverrideSdkPrivateCfg.xml` and `SystemConfiguration.xml`) in the writable user data directory instead of the read-only ASAR package.

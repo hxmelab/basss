@@ -28,6 +28,7 @@ contextBridge.exposeInMainWorld('api', {
   addFavoriteByUuid: (uuid) => ipcRenderer.invoke('add-favorite-by-uuid', uuid),
   getFavorites: () => ipcRenderer.invoke('get-favorites'),
   deleteFavorite: (uuid) => ipcRenderer.invoke('delete-favorite', uuid),
+  deleteDevice: (deviceId) => ipcRenderer.invoke('delete-device', deviceId),
   // Speaker preset management
   getSpeakerPresets: (targetIp) => ipcRenderer.invoke('get-speaker-presets', targetIp),
   saveSpeakerPreset: (options) => ipcRenderer.invoke('save-speaker-preset', options),
@@ -36,6 +37,7 @@ contextBridge.exposeInMainWorld('api', {
   createUsbFile: (folderPath) => ipcRenderer.invoke('create-usb-file', folderPath),
   // Speaker controls
   triggerSpeakerKey: (targetIp, key) => ipcRenderer.invoke('trigger-speaker-key', { targetIp, key }),
+  playSpeakerFavorite: (targetIp, name, uuid) => ipcRenderer.invoke('play-speaker-favorite', { targetIp, name, uuid }),
   getSpeakerState: (targetIp) => ipcRenderer.invoke('get-speaker-state', targetIp),
   setSpeakerVolume: (targetIp, volume) => ipcRenderer.invoke('set-speaker-volume', { targetIp, volume }),
   setSpeakerBass: (targetIp, bass) => ipcRenderer.invoke('set-speaker-bass', { targetIp, bass }),

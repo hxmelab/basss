@@ -252,6 +252,9 @@ function renderDeviceCards(devicesList) {
           <span class="model">${type}</span>
         </div>
         <div class="device-card-badges" style="display: flex; gap: 8px; align-items: center;">
+          <span class="delete-device-btn" id="delete-btn-${dev.deviceId}" data-device-id="${dev.deviceId}" title="Gerät löschen" style="cursor: pointer;">
+            <i class="fa-solid fa-trash-can"></i>
+          </span>
           <span class="telnet-icon ${badgeClass}" id="telnet-badge-${dev.deviceId}" data-ip="${ip}" data-device-id="${dev.deviceId}" title="${badgeText}" style="cursor: pointer;">
             <i class="fa-solid ${badgeIcon}"></i>
           </span>
@@ -324,8 +327,14 @@ function renderDeviceCards(devicesList) {
           `).join('')}
         </div>
         
-        <!-- Sources Section (Bluetooth / AUX) -->
-        <div class="card-sources-section">
+        <!-- Sources Section (Bluetooth / AUX & Play Favorite stacked) -->
+        <div class="card-sources-section" style="flex-direction: column;">
+          <button class="btn-source-action btn-play-favorite" 
+                  data-ip="${ip}" 
+                  data-device-id="${dev.deviceId}" 
+                  title="Play Favorite Station">
+            <i class="fa-solid fa-star"></i> Play Favorite
+          </button>
           <button class="btn-source-action btn-aux-source" 
                   data-ip="${ip}" 
                   data-device-id="${dev.deviceId}" 
@@ -785,6 +794,21 @@ const btnClosePresetModal = document.getElementById('btn-close-preset-modal');
 const modalFavoritesList = document.getElementById('modal-favorites-list');
 
 let activePresetTarget = null; // will hold { ip, deviceId, presetId }
+let modalMode = 'select'; // 'select' or 'play'
+let activePlayTarget = null; // will hold { ip, deviceId }
+
+// Bind clicks on Play Favorite buttons (.btn-play-favorite)
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.btn-play-favorite');
+  if (!btn) return;
+
+  const ip = btn.getAttribute('data-ip');
+  const deviceId = btn.getAttribute('data-device-id');
+
+  modalMode = 'play';
+  activePlayTarget = { ip, deviceId };
+  openPresetSelectorModal();
+});
 
 // Bind clicks on preset buttons (.btn-preset-action)
 document.addEventListener('click', async (e) => {
@@ -795,6 +819,7 @@ document.addEventListener('click', async (e) => {
   const deviceId = btn.getAttribute('data-device-id');
   const presetId = btn.getAttribute('data-preset-id');
 
+  modalMode = 'select';
   activePresetTarget = { ip, deviceId, presetId };
   openPresetSelectorModal();
 });
@@ -860,6 +885,17 @@ window.addEventListener('click', (e) => {
 async function openPresetSelectorModal() {
   if (!presetSelectModal || !modalFavoritesList) return;
 
+  const titleEl = presetSelectModal.querySelector('.modal-header h3');
+  const descEl = presetSelectModal.querySelector('.modal-body p');
+
+  if (modalMode === 'play') {
+    if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-star"></i> Play Favorite Station';
+    if (descEl) descEl.textContent = 'Choose a saved favorite to play directly on this speaker:';
+  } else {
+    if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-star"></i> Select Favorite Station';
+    if (descEl) descEl.textContent = 'Choose a saved favorite to assign to this preset button:';
+  }
+
   modalFavoritesList.innerHTML = '<div class="scan-loader"><div class="spinner"></div><p>Loading favorites...</p></div>';
   presetSelectModal.style.display = 'flex';
 
@@ -883,17 +919,45 @@ async function openPresetSelectorModal() {
       item.className = 'modal-fav-item';
 
       const streamUrl = (fav.audio && fav.audio.streamUrl) || 'No Stream URL';
+      const buttonText = modalMode === 'play' ? 'Play' : 'Select';
 
       item.innerHTML = `
         <div class="modal-fav-info">
           <h4>${fav.name}</h4>
           <span>${streamUrl}</span>
         </div>
-        <button class="btn btn-secondary select-modal-fav" style="padding: 6px 12px; font-size: 0.75rem;">Select</button>`;
+        <button class="btn btn-secondary select-modal-fav" style="padding: 6px 12px; font-size: 0.75rem;">${buttonText}</button>`;
 
-      item.addEventListener('click', () => {
-        selectFavoriteForTarget(fav);
-      });
+      if (modalMode === 'play') {
+        const btnPlay = item.querySelector('.select-modal-fav');
+        const playAction = async (e) => {
+          e.stopPropagation();
+          if (btnPlay.disabled) return;
+
+          btnPlay.disabled = true;
+          const originalText = btnPlay.textContent;
+          btnPlay.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+          try {
+            await window.api.playSpeakerFavorite(activePlayTarget.ip, fav.name, fav.uuid);
+            btnPlay.innerHTML = '<i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i>';
+            setTimeout(() => {
+              btnPlay.disabled = false;
+              btnPlay.textContent = originalText;
+            }, 2000);
+          } catch (err) {
+            alert(`Failed to play favorite: ${err.message}`);
+            btnPlay.disabled = false;
+            btnPlay.textContent = originalText;
+          }
+        };
+
+        item.addEventListener('click', playAction);
+      } else {
+        item.addEventListener('click', () => {
+          selectFavoriteForTarget(fav);
+        });
+      }
 
       modalFavoritesList.appendChild(item);
     });
@@ -1081,6 +1145,36 @@ document.addEventListener('click', (e) => {
   if (badge) {
     e.preventDefault();
     handleTelnetCheck(badge);
+  }
+});
+
+// Delete Device Click Listener
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.delete-device-btn');
+  if (btn) {
+    e.preventDefault();
+    const deviceId = btn.getAttribute('data-device-id');
+    
+    // Close the active WebSocket connection for this device if it exists
+    if (wsConnections.has(deviceId)) {
+      const conn = wsConnections.get(deviceId);
+      if (conn && conn.ws) {
+        try {
+          conn.ws.close();
+        } catch (err) {}
+      }
+      wsConnections.delete(deviceId);
+    }
+
+    try {
+      await window.api.deleteDevice(deviceId);
+      // Reload devices store and re-render card layout
+      await loadDevicesStore();
+      renderDeviceCards(Object.values(devicesData.devices));
+    } catch (err) {
+      console.error('Failed to delete device:', err.message);
+      alert(`Failed to delete device: ${err.message}`);
+    }
   }
 });
 
