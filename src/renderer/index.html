@@ -273,6 +273,12 @@
               stick containing the <code>remote_services</code> file into the USB port on the back of the speaker, and
               plug the power cable back in. The speaker will reboot with Telnet enabled.
             </p>
+            <p
+              style="margin-top: 10px; color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+              ⚠️ <strong>Note for SoundTouch 10:</strong> The SoundTouch 10 only features a Micro-USB port on the back.
+              To connect a standard USB stick, you must use a Micro-USB adapter that explicitly supports
+              <strong>USB-OTG</strong>.
+            </p>
           </div>
 
           <!-- Step 3: Select Endpoints -->
@@ -301,8 +307,10 @@
               prefer the hostname option (e.g. <code>.local</code> or <code>.fritz.box</code>). You can verify if it is
               active using the host check indicator on the bottom left.<br>
               ⚠️ <strong>Important for FRITZ!Box users:</strong> Make sure to select the hostname ending in
-              <code>.fritz.box</code>. The <code>.local</code> ending often does not work on FRITZ!Boxes, even if it is
-              shown as green in the status list!
+              <code>.fritz.box</code>.
+            </p>
+            <p style="margin-top: 10px; color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+              ⚙️ <strong>Static IP Fallback:</strong> If hostnames are not supported or fail to resolve in your local network, you will need to select the server's raw IP address. In this case, please configure your router (DHCP static lease / "Always assign same IP") so that the computer running the BASSS app always receives the same IP address, preventing connection loss in the future.
             </p>
           </div>
 
@@ -359,8 +367,8 @@
 
         <div class="webview-container card glass"
           style="flex-grow: 1; padding: 0; overflow: hidden; height: calc(100vh - 200px); border: 1px solid var(--border-color);">
-          <webview id="radio-browser-webview"
-            style="width: 100%; height: 100%; border: none; background: #fff;"></webview>
+          <webview id="radio-browser-webview" style="width: 100%; height: 100%; border: none; background: #fff;">
+          </webview>
         </div>
       </section>
 

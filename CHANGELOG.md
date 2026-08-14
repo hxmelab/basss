@@ -2,7 +2,7 @@
 
 All notable changes to the **BASSS** project will be documented in this file.
 
-## [1.0.4] - 2026-08-10
+## [1.0.4] - 2026-08-14
 
 - Upgrade GitHub Actions `actions/checkout` (to `v6`) and `actions/setup-node` (to `v7`) in `release.yml` to resolve Node.js 20 deprecation warnings on the runners.
 - Fix a bug in the `modify.js` CLI script where newly configured speakers would lose their account configuration upon reboot by automatically querying the speaker's MAC address and registering the new account mapping on the BASSS server.

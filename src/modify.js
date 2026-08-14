@@ -8,13 +8,14 @@
 // ==========================================================================
 // CONFIGURATION PARAMETERS
 // ==========================================================================
-const NAME = "SoundTouch";          // Name of the Bose speaker
+const NAME = "Bath";          // Name of the Bose speaker
 const SPEAKER = "192.168.0.27";    // IP address of the Bose speaker
 const SERVER = "raspi.fritz.box";     // IP/Hostname of your BASSS server
 const PORT = 8053;                  // Port of your BASSS server
 // ==========================================================================
 
 const net = require('net');
+const http = require('http');
 
 // Generate a random 7-digit accountId
 const accountId = String(Math.floor(1000000 + Math.random() * 9000000));
@@ -54,76 +55,184 @@ console.log(`BASSS Server: http://${SERVER}:${PORT}`);
 console.log(`Account ID:   ${accountId} (dynamically generated)`);
 console.log('--------------------------------------------------');
 
-const client = new net.Socket();
-let sessionData = '';
-let step = 0;
+/**
+ * Fetch speaker metadata (deviceID and type) from local API (port 8090)
+ */
+function fetchSpeakerInfo(ip) {
+  return new Promise((resolve, reject) => {
+    console.log(`🔍 Querying speaker info from http://${ip}:8090/info...`);
+    const req = http.get(`http://${ip}:8090/info`, { timeout: 3000 }, (res) => {
+      if (res.statusCode !== 200) {
+        reject(new Error(`Speaker returned HTTP status ${res.statusCode}`));
+        return;
+      }
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        const deviceIdMatch = data.match(/deviceID="([^"]+)"/i);
+        const deviceId = deviceIdMatch ? deviceIdMatch[1] : null;
+        const typeMatch = data.match(/<type>(.*?)<\/type>/i);
+        const deviceType = typeMatch ? typeMatch[1] : 'SoundTouch';
+        
+        if (!deviceId) {
+          reject(new Error('Could not find deviceID in speaker info XML'));
+          return;
+        }
+        resolve({ deviceId, deviceType });
+      });
+    });
+    
+    req.on('error', err => reject(err));
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Speaker info request timed out'));
+    });
+  });
+}
 
-console.log(`🔌 Connecting to speaker on ${SPEAKER}:23...`);
+/**
+ * Register the newly generated account mapping with the local BASSS server
+ */
+function registerAccountOnServer(deviceId, deviceType) {
+  return new Promise((resolve) => {
+    console.log(`📡 Registering account mapping with BASSS server at http://${SERVER}:${PORT}...`);
+    const postData = JSON.stringify({
+      serverIp: SERVER,
+      name: NAME,
+      type: deviceType,
+      accountId: accountId
+    });
 
-client.connect(23, SPEAKER, () => {
-  console.log('✅ Connected! Waiting for login prompt...');
-});
+    const req = http.request({
+      hostname: SERVER,
+      port: PORT,
+      path: `/api/devices/${deviceId}/modify`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      },
+      timeout: 3000
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log(`✅ Successfully registered new accountId (${accountId}) on BASSS server!`);
+        } else {
+          console.warn(`⚠️ BASSS server returned error code ${res.statusCode}: ${data}`);
+        }
+        resolve();
+      });
+    });
 
-client.on('data', (data) => {
-  const chunk = data.toString();
-  sessionData += chunk;
+    req.on('error', (err) => {
+      console.warn(`⚠️ Failed to register account mapping on BASSS server: ${err.message}`);
+      resolve(); // resolve anyway so we don't block modifier completion
+    });
+    
+    req.on('timeout', () => {
+      req.destroy();
+      console.warn('⚠️ BASSS server registration timed out.');
+      resolve();
+    });
 
-  // Step 0: Login
-  if (step === 0 && (sessionData.toLowerCase().includes('login:') || sessionData.toLowerCase().includes('username:'))) {
-    console.log('👤 Logging in as root...');
-    client.write('root\r\n');
-    sessionData = '';
-    step = 1;
-  }
-  // Step 1: Backup original SystemConfigurationDB.xml on speaker
-  else if (step === 1 && sessionData.includes('#')) {
-    console.log('📂 Backing up original SystemConfigurationDB.xml on speaker...');
-    client.write('cp /mnt/nv/BoseApp-Persistence/1/SystemConfigurationDB.xml /mnt/nv/SystemConfiguration.bak\r\n');
-    sessionData = '';
-    step = 2;
-  }
-  // Step 2: Write OverrideSdkPrivateCfg.xml
-  else if (step === 2 && sessionData.includes('#')) {
-    console.log('📝 Writing OverrideSdkPrivateCfg.xml to speaker (/mnt/nv/)...');
-    client.write("cat << 'EOF' > /mnt/nv/OverrideSdkPrivateCfg.xml\r\n");
-    client.write(overrideXml);
-    client.write('\r\nEOF\r\n');
-    sessionData = '';
-    step = 3;
-  }
-  // Step 3: Write populated SystemConfigurationDB.xml
-  else if (step === 3 && sessionData.includes('#')) {
-    console.log('📝 Writing new SystemConfigurationDB.xml to speaker (/mnt/nv/BoseApp-Persistence/1/)...');
-    client.write("cat << 'EOF' > /mnt/nv/BoseApp-Persistence/1/SystemConfigurationDB.xml\r\n");
-    client.write(systemConfigXml);
-    client.write('\r\nEOF\r\n');
-    sessionData = '';
-    step = 4;
-  }
-  // Step 4: Reboot
-  else if (step === 4 && sessionData.includes('#')) {
-    console.log('🔄 Rebooting the speaker to apply changes...');
-    client.write('reboot\r\n');
-    step = 5;
+    req.write(postData);
+    req.end();
+  });
+}
 
-    setTimeout(() => {
-      console.log('\n🎉 Speaker modification completed successfully!');
-      console.log('🔌 Connection closed. The speaker is now rebooting.');
-      client.destroy();
-      process.exit(0);
-    }, 1500);
-  }
-});
+/**
+ * Main Telnet execution flow
+ */
+function startTelnetFlow(deviceId, deviceType) {
+  const client = new net.Socket();
+  let sessionData = '';
+  let step = 0;
 
-client.on('error', (err) => {
-  console.error(`\n❌ Error: ${err.message}`);
-  client.destroy();
-  process.exit(1);
-});
+  console.log(`🔌 Connecting to speaker on ${SPEAKER}:23...`);
 
-client.on('close', () => {
-  if (step < 5) {
-    console.error('\n❌ Connection closed prematurely.');
+  client.connect(23, SPEAKER, () => {
+    console.log('✅ Connected! Waiting for login prompt...');
+  });
+
+  client.on('data', (data) => {
+    const chunk = data.toString();
+    sessionData += chunk;
+
+    // Step 0: Login
+    if (step === 0 && (sessionData.toLowerCase().includes('login:') || sessionData.toLowerCase().includes('username:'))) {
+      console.log('👤 Logging in as root...');
+      client.write('root\r\n');
+      sessionData = '';
+      step = 1;
+    }
+    // Step 1: Backup original SystemConfigurationDB.xml on speaker
+    else if (step === 1 && sessionData.includes('#')) {
+      console.log('📂 Backing up original SystemConfigurationDB.xml on speaker...');
+      client.write('cp /mnt/nv/BoseApp-Persistence/1/SystemConfigurationDB.xml /mnt/nv/SystemConfiguration.bak\r\n');
+      sessionData = '';
+      step = 2;
+    }
+    // Step 2: Write OverrideSdkPrivateCfg.xml
+    else if (step === 2 && sessionData.includes('#')) {
+      console.log('📝 Writing OverrideSdkPrivateCfg.xml to speaker (/mnt/nv/)...');
+      client.write("cat << 'EOF' > /mnt/nv/OverrideSdkPrivateCfg.xml\r\n");
+      client.write(overrideXml);
+      client.write('\r\nEOF\r\n');
+      sessionData = '';
+      step = 3;
+    }
+    // Step 3: Write populated SystemConfigurationDB.xml
+    else if (step === 3 && sessionData.includes('#')) {
+      console.log('📝 Writing new SystemConfigurationDB.xml to speaker (/mnt/nv/BoseApp-Persistence/1/)...');
+      client.write("cat << 'EOF' > /mnt/nv/BoseApp-Persistence/1/SystemConfigurationDB.xml\r\n");
+      client.write(systemConfigXml);
+      client.write('\r\nEOF\r\n');
+      sessionData = '';
+      step = 4;
+    }
+    // Step 4: Reboot
+    else if (step === 4 && sessionData.includes('#')) {
+      console.log('🔄 Rebooting the speaker to apply changes...');
+      client.write('reboot\r\n');
+      step = 5;
+
+      setTimeout(async () => {
+        console.log('🔌 Connection closed.');
+        client.destroy();
+
+        // Register the new account ID with the server
+        await registerAccountOnServer(deviceId, deviceType);
+
+        console.log('\n🎉 Speaker modification completed successfully!');
+        process.exit(0);
+      }, 1500);
+    }
+  });
+
+  client.on('error', (err) => {
+    console.error(`\n❌ Error: ${err.message}`);
+    client.destroy();
     process.exit(1);
-  }
-});
+  });
+
+  client.on('close', () => {
+    if (step < 5) {
+      console.error('\n❌ Connection closed prematurely.');
+      process.exit(1);
+    }
+  });
+}
+
+// Start flow by querying speaker info first
+fetchSpeakerInfo(SPEAKER)
+  .then(({ deviceId, deviceType }) => {
+    console.log(`ℹ️ Speaker details retrieved: DeviceId=${deviceId}, Model=${deviceType}`);
+    startTelnetFlow(deviceId, deviceType);
+  })
+  .catch((err) => {
+    console.error(`\n❌ Failed to retrieve speaker details: ${err.message}`);
+    console.error('Please make sure the speaker is powered on and connected to the same network.');
+    process.exit(1);
+  });

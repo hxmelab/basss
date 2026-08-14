@@ -4,6 +4,22 @@ const DataStore = require('./datastore');
 const SoundTouchService = require('./service');
 const { setupRoutes } = require('./routes');
 
+const colors = {
+  reset: '\x1b[0m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m'
+};
+
+// Monkey-patch console.error to output in red in the terminal
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  const text = args.map(a => typeof a === 'object' ? (a.stack || JSON.stringify(a)) : String(a)).join(' ');
+  const coloredText = text.startsWith('\x1b[31m') ? text : `${colors.red}${text}${colors.reset}`;
+  originalConsoleError(coloredText);
+};
+
 const PORT = process.env.PORT || 8053;
 
 /**
@@ -106,22 +122,42 @@ function createServer() {
       extraInfo = `DeviceId (extracted): none`;
     }
 
-    console.log(`[${timestamp}] 📥 Request: ${method} ${url} | from IP: ${ip} | ${extraInfo} | Headers: x-screamer-deviceid=${screamerId}, x-bose-device-id=${boseIdHeader}`);
+    const logMsg = `[${timestamp}] 📥 Request: ${method} ${url} | from IP: ${ip} | ${extraInfo} | Headers: x-screamer-deviceid=${screamerId}, x-bose-device-id=${boseIdHeader}`;
+    if (method === 'POST' || method === 'GET' || method === 'PUT') {
+      console.log(`${colors.green}${logMsg}${colors.reset}`);
+    } else {
+      console.log(logMsg);
+    }
 
     if (req.body && (method === 'POST' || method === 'PUT')) {
       const bodyStr = typeof req.body === 'string' ? req.body.trim() : JSON.stringify(req.body);
       if (bodyStr.length > 0) {
-        console.log(`      Body (plain text): ${bodyStr.slice(0, 1000)}${bodyStr.length > 1000 ? '...' : ''}`);
+        const bodyLog = `      Body (plain text): ${bodyStr.slice(0, 1000)}${bodyStr.length > 1000 ? '...' : ''}`;
+        if (method === 'POST' || method === 'PUT') {
+          console.log(`${colors.green}${bodyLog}${colors.reset}`);
+        } else {
+          console.log(bodyLog);
+        }
       } else {
-        console.log(`      Body: (empty string)`);
+        const bodyLog = `      Body: (empty string)`;
+        if (method === 'POST' || method === 'PUT') {
+          console.log(`${colors.green}${bodyLog}${colors.reset}`);
+        } else {
+          console.log(bodyLog);
+        }
       }
     } else if (method === 'POST' || method === 'PUT') {
-      console.log(`      Body: (null / undefined)`);
+      const bodyLog = `      Body: (null / undefined)`;
+      if (method === 'POST' || method === 'PUT') {
+        console.log(`${colors.green}${bodyLog}${colors.reset}`);
+      } else {
+        console.log(bodyLog);
+      }
     }
 
     const originalSend = res.send;
     res.send = function (body) {
-      console.log(`[${timestamp}] 📤 Response: ${res.statusCode} for ${method} ${url}`);
+      console.log(`${colors.blue}[${timestamp}] 📤 Response: ${res.statusCode} for ${method} ${url}${colors.reset}`);
       return originalSend.apply(this, arguments);
     };
 
@@ -148,9 +184,9 @@ function createServer() {
     const ip = normalizeIp(req.ip || req.connection.remoteAddress);
     const bodyStr = typeof req.body === 'string' ? req.body.trim() : JSON.stringify(req.body || '');
 
-    console.warn(`[${timestamp}] ⚠️ Unknown route requested: ${method} ${url} | IP: ${ip}`);
+    console.warn(`${colors.yellow}[${timestamp}] ⚠️ Unknown route requested: ${method} ${url} | IP: ${ip}${colors.reset}`);
     if (bodyStr) {
-      console.warn(`      Body: ${bodyStr.slice(0, 500)}`);
+      console.warn(`${colors.yellow}      Body: ${bodyStr.slice(0, 500)}${colors.reset}`);
     }
 
     if (url.startsWith('/bmx')) {

@@ -551,30 +551,31 @@ a {
 }
 
 .log-line.system {
-  color: #3b82f6;
+  color: #64748b; /* Gray for system start messages */
 }
 
 .log-line.request-get {
-  color: #34d399;
-  /* Green for GET requests */
+  color: var(--color-success); /* Green for GET requests */
 }
 
 .log-line.request-post {
-  color: #fbbf24;
-  /* Yellow for POST requests */
+  color: var(--color-success); /* Green for POST requests and bodies */
 }
 
 .log-line.request-delete {
-  color: #f87171;
-  /* Red for DELETE requests */
+  color: #f87171; /* Light red for DELETE requests */
+}
+
+.log-line.response {
+  color: #3b82f6; /* Blue for responses */
 }
 
 .log-line.warn {
-  color: var(--color-warning);
+  color: var(--color-warning); /* Yellow for warnings / unknown routes */
 }
 
 .log-line.error {
-  color: var(--color-danger);
+  color: var(--color-danger); /* Red for errors */
 }
 
 /* ==========================================================================

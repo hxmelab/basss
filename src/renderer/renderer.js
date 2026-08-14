@@ -131,6 +131,9 @@ async function loadServerStatus() {
   }
 }
 
+// Keep track of the last request method to color the body logs correctly in the GUI
+let lastRequestMethod = '';
+
 // Receive Real-time console logs from IPC
 window.api.onServerLog((log) => {
   const line = document.createElement('div');
@@ -147,11 +150,20 @@ window.api.onServerLog((log) => {
     // Check if it's a request log to apply color coding
     const text = log.text;
     if (text.includes('📥 Request: GET')) {
+      lastRequestMethod = 'GET';
       line.classList.add('request-get');
     } else if (text.includes('📥 Request: POST') || text.includes('📥 Request: PUT')) {
+      lastRequestMethod = text.includes('📥 Request: POST') ? 'POST' : 'PUT';
       line.classList.add('request-post');
     } else if (text.includes('📥 Request: DELETE')) {
+      lastRequestMethod = 'DELETE';
       line.classList.add('request-delete');
+    } else if (text.includes('[scmudc] Telemetry received')) {
+      line.classList.add('request-post'); // Green for telemetry POST
+    } else if (text.startsWith('      Body') && (lastRequestMethod === 'POST' || lastRequestMethod === 'PUT')) {
+      line.classList.add('request-post'); // Green for POST/PUT body
+    } else if (text.includes('📤 Response:')) {
+      line.classList.add('response'); // Blue for response
     } else if (text.includes('🎵 SoundTouch Backend started') || text.includes('✅ Express Backend Server')) {
       line.classList.add('system');
     }

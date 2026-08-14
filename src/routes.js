@@ -370,7 +370,7 @@ function setupRoutes(app, service) {
       const isDigitsOnly = rawBoseId && /^\d+$/.test(String(rawBoseId));
       const effectiveBoseId = isDigitsOnly ? String(rawBoseId) : undefined;
 
-      console.log(`[scmudc] Telemetry received for device ${deviceId} | Extracted boseID: ${rawBoseId || 'none'} -> accountId: ${effectiveBoseId || 'none'} | IP: ${clientIp}`);
+      console.log(`\x1b[32m[scmudc] Telemetry received for device ${deviceId} | Extracted boseID: ${rawBoseId || 'none'} -> accountId: ${effectiveBoseId || 'none'} | IP: ${clientIp}\x1b[0m`);
 
       if (deviceId) {
         service.updateDeviceBoseId(deviceId, effectiveBoseId, info, clientIp);

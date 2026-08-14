@@ -109,21 +109,6 @@ If you want to host BASSS on a Linux server (e.g., Debian or Raspberry Pi OS) wi
 
 Make sure Node.js (v16+) and npm are installed on your Linux machine. 
 
-If your Linux system has a firewall active, you must open port `8053` (note that on a default Debian/Raspberry Pi OS installation, no firewall is active by default, so ports are already open and you can skip this):
-
-* If you are using **UFW** (install with `sudo apt install ufw` if missing):
-  ```bash
-  sudo ufw allow 8053/tcp
-  ```
-* If you are using **iptables** (install with `sudo apt install iptables` if missing):
-  ```bash
-  sudo iptables -A INPUT -p tcp --dport 8053 -j ACCEPT
-  ```
-* If you are using **nftables** (default on modern Debian):
-  ```bash
-  sudo nft add rule inet filter input tcp dport 8053 accept
-  ```
-
 #### Setup and Start
 1. Clone the repository and install only the production dependencies (omitting Electron):
    ```bash
@@ -166,6 +151,44 @@ Execute the script using Node.js:
 node src/modify.js
 ```
 The script will dynamically generate a random 7-digit Account UUID, connect to the speaker via Telnet (port 23), back up the original `SystemConfigurationDB.xml` to `SystemConfiguration.bak`, write the redirect files to the speaker, and trigger a reboot to apply the changes.
+
+### 3. Firewall Management
+
+#### Linux
+If your Linux system has a firewall active, you must open port `8053` (note that on a default Debian/Raspberry Pi OS installation, no firewall is active by default, so ports are already open and you can skip this):
+
+* If you are using **UFW** (install with `sudo apt install ufw` if missing):
+  ```bash
+  sudo ufw allow 8053/tcp
+  ```
+* If you are using **iptables** (install with `sudo apt install iptables` if missing):
+  ```bash
+  sudo iptables -A INPUT -p tcp --dport 8053 -j ACCEPT
+  ```
+* If you are using **nftables** (default on modern Debian):
+  ```bash
+  sudo nft add rule inet filter input tcp dport 8053 accept
+  ```
+
+#### Windows (PowerShell)
+If you need to manually configure, disable, or remove the Windows Firewall rules for BASSS, run the following commands in an elevated PowerShell terminal (Run as Administrator):
+
+* **Create / Allow traffic on port 8053:**
+  ```powershell
+  New-NetFirewallRule -DisplayName "BASSS" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8053 -Profile Private,Domain
+  ```
+* **Disable the firewall rule:**
+  ```powershell
+  Disable-NetFirewallRule -DisplayName "BASSS"
+  ```
+* **Enable the firewall rule:**
+  ```powershell
+  Enable-NetFirewallRule -DisplayName "BASSS"
+  ```
+* **Remove / Delete the firewall rule:**
+  ```powershell
+  Remove-NetFirewallRule -DisplayName "BASSS"
+  ```
 
 ---
 

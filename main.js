@@ -17,7 +17,8 @@ const originalError = console.error;
 
 function sendLogToWindow(type, text) {
   if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('server-log', { type, text });
+    const cleanText = text.replace(/\x1b\[[0-9;]*m/g, '');
+    mainWindow.webContents.send('server-log', { type, text: cleanText });
   }
 }
 
@@ -38,8 +39,9 @@ console.warn = (...args) => {
   sendLogToWindow('warn', text);
 };
 console.error = (...args) => {
-  const text = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-  originalError.apply(console, args);
+  const text = args.map(a => typeof a === 'object' ? (a.stack || JSON.stringify(a)) : String(a)).join(' ');
+  const coloredText = text.startsWith('\x1b[31m') ? text : `\x1b[31m${text}\x1b[0m`;
+  originalError.call(console, coloredText);
   sendLogToWindow('error', text);
 };
 
@@ -91,13 +93,13 @@ function checkAndSetupFirewall(port, isRetry = false) {
   const platform = process.platform;
 
   if (platform === 'win32') {
-    exec('netsh advfirewall firewall show rule name="DST"', (err, stdout) => {
-      const dstRuleExists = !err && stdout && stdout.includes('DST');
+    exec('netsh advfirewall firewall show rule name="BASSS"', (err, stdout) => {
+      const basssRuleExists = !err && stdout && stdout.includes('BASSS');
 
       exec(`netsh advfirewall firewall show rule name=all | findstr ${port}`, (err2, stdout2) => {
         const portRuleExists = !err2 && stdout2 && stdout2.includes(String(port));
 
-        if (dstRuleExists || portRuleExists) {
+        if (basssRuleExists || portRuleExists) {
           firewallStatus = { status: 'allowed', message: `Port ${port}` };
           sendFirewallStatusToWindow();
           console.log(`[Firewall] Port ${port} is allowed by Windows Firewall rule.`);
@@ -121,7 +123,7 @@ function checkAndSetupFirewall(port, isRetry = false) {
             buttons: ['Verstanden', 'Abbrechen']
           }).then((result) => {
             if (result.response === 0) { // 'Verstanden'
-              const psCommand = `Start-Process powershell -ArgumentList '-NoProfile -Command New-NetFirewallRule -DisplayName DST -Direction Inbound -Action Allow -Protocol TCP -LocalPort ${port} -Profile Private,Domain' -Verb RunAs -Wait`;
+              const psCommand = `Start-Process powershell -ArgumentList '-NoProfile -Command New-NetFirewallRule -DisplayName BASSS -Direction Inbound -Action Allow -Protocol TCP -LocalPort ${port} -Profile Private,Domain' -Verb RunAs -Wait`;
               exec(`powershell -Command "${psCommand}"`, (err3) => {
                 if (err3) {
                   console.error('[Firewall] Windows Firewall rule request failed or denied:', err3.message);
