@@ -8,8 +8,8 @@
 // ==========================================================================
 // CONFIGURATION PARAMETERS
 // ==========================================================================
-const NAME = "Bath";          // Name of the Bose speaker
-const SPEAKER = "192.168.0.27";    // IP address of the Bose speaker
+const NAME = "BASSS";          // Name of the Bose SoundTouch speaker
+const SPEAKER = "192.168.0.26";    // IP address of the Bose speaker
 const SERVER = "raspi.fritz.box";     // IP/Hostname of your BASSS server
 const PORT = 8053;                  // Port of your BASSS server
 // ==========================================================================
@@ -73,7 +73,7 @@ function fetchSpeakerInfo(ip) {
         const deviceId = deviceIdMatch ? deviceIdMatch[1] : null;
         const typeMatch = data.match(/<type>(.*?)<\/type>/i);
         const deviceType = typeMatch ? typeMatch[1] : 'SoundTouch';
-        
+
         if (!deviceId) {
           reject(new Error('Could not find deviceID in speaker info XML'));
           return;
@@ -81,7 +81,7 @@ function fetchSpeakerInfo(ip) {
         resolve({ deviceId, deviceType });
       });
     });
-    
+
     req.on('error', err => reject(err));
     req.on('timeout', () => {
       req.destroy();
@@ -130,7 +130,7 @@ function registerAccountOnServer(deviceId, deviceType) {
       console.warn(`⚠️ Failed to register account mapping on BASSS server: ${err.message}`);
       resolve(); // resolve anyway so we don't block modifier completion
     });
-    
+
     req.on('timeout', () => {
       req.destroy();
       console.warn('⚠️ BASSS server registration timed out.');
@@ -225,14 +225,61 @@ function startTelnetFlow(deviceId, deviceType) {
   });
 }
 
-// Start flow by querying speaker info first
-fetchSpeakerInfo(SPEAKER)
+/**
+ * Check if the BASSS server is up and healthy
+ */
+function checkServerHealth() {
+  return new Promise((resolve, reject) => {
+    console.log(`🔍 Checking BASSS server health at http://${SERVER}:${PORT}/health...`);
+    const req = http.get(`http://${SERVER}:${PORT}/health`, { timeout: 3000 }, (res) => {
+      if (res.statusCode !== 200) {
+        reject(new Error(`Server returned status code ${res.statusCode}`));
+        return;
+      }
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          if (json && json.status === 'ok') {
+            resolve();
+          } else {
+            reject(new Error('Server status is not "ok"'));
+          }
+        } catch (e) {
+          reject(new Error('Invalid JSON response from server'));
+        }
+      });
+    });
+
+    req.on('error', (err) => {
+      reject(new Error(`Server is unreachable (${err.message})`));
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Server request timed out'));
+    });
+  });
+}
+
+// Start flow by checking server health first
+checkServerHealth()
+  .then(() => {
+    console.log('✅ BASSS server is online and healthy.');
+    return fetchSpeakerInfo(SPEAKER);
+  })
   .then(({ deviceId, deviceType }) => {
     console.log(`ℹ️ Speaker details retrieved: DeviceId=${deviceId}, Model=${deviceType}`);
     startTelnetFlow(deviceId, deviceType);
   })
   .catch((err) => {
-    console.error(`\n❌ Failed to retrieve speaker details: ${err.message}`);
-    console.error('Please make sure the speaker is powered on and connected to the same network.');
+    if (err.message.includes('Server') || err.message.includes('server')) {
+      console.error(`\n❌ Server health check failed: ${err.message}`);
+      console.error(`Please start the BASSS server first (http://${SERVER}:${PORT}), otherwise issues may occur.`);
+    } else {
+      console.error(`\n❌ Failed to retrieve speaker details: ${err.message}`);
+      console.error('Please make sure the speaker is powered on and connected to the same network.');
+    }
     process.exit(1);
   });
