@@ -38,6 +38,8 @@ contextBridge.exposeInMainWorld('api', {
   // Speaker controls
   triggerSpeakerKey: (targetIp, key) => ipcRenderer.invoke('trigger-speaker-key', { targetIp, key }),
   playSpeakerFavorite: (targetIp, name, uuid) => ipcRenderer.invoke('play-speaker-favorite', { targetIp, name, uuid }),
+  getSpeakerRecents: (targetIp) => ipcRenderer.invoke('get-speaker-recents', targetIp),
+  playSpeakerRecent: (options) => ipcRenderer.invoke('play-speaker-recent', options),
   getSpeakerState: (targetIp) => ipcRenderer.invoke('get-speaker-state', targetIp),
   setSpeakerVolume: (targetIp, volume) => ipcRenderer.invoke('set-speaker-volume', { targetIp, volume }),
   setSpeakerBass: (targetIp, bass) => ipcRenderer.invoke('set-speaker-bass', { targetIp, bass }),

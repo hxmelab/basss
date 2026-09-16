@@ -339,13 +339,19 @@ function renderDeviceCards(devicesList) {
           `).join('')}
         </div>
         
-        <!-- Sources Section (Bluetooth / AUX & Play Favorite stacked) -->
+        <!-- Sources Section (Bluetooth / AUX & Play Favorite / Play Recent stacked) -->
         <div class="card-sources-section" style="flex-direction: column;">
           <button class="btn-source-action btn-play-favorite" 
                   data-ip="${ip}" 
                   data-device-id="${dev.deviceId}" 
                   title="Play Favorite Station">
             <i class="fa-solid fa-star"></i> Play Favorite
+          </button>
+          <button class="btn-source-action btn-play-recent" 
+                  data-ip="${ip}" 
+                  data-device-id="${dev.deviceId}" 
+                  title="Play Recent Station">
+            <i class="fa-solid fa-clock-rotate-left"></i> Play Recent
           </button>
           <button class="btn-source-action btn-aux-source" 
                   data-ip="${ip}" 
@@ -822,6 +828,19 @@ document.addEventListener('click', async (e) => {
   openPresetSelectorModal();
 });
 
+// Bind clicks on Play Recent buttons (.btn-play-recent)
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.btn-play-recent');
+  if (!btn) return;
+
+  const ip = btn.getAttribute('data-ip');
+  const deviceId = btn.getAttribute('data-device-id');
+
+  modalMode = 'recent';
+  activePlayTarget = { ip, deviceId };
+  openPresetSelectorModal();
+});
+
 // Bind clicks on preset buttons (.btn-preset-action)
 document.addEventListener('click', async (e) => {
   const btn = e.target.closest('.btn-preset-action');
@@ -894,6 +913,16 @@ window.addEventListener('click', (e) => {
   }
 });
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 async function openPresetSelectorModal() {
   if (!presetSelectModal || !modalFavoritesList) return;
 
@@ -903,10 +932,88 @@ async function openPresetSelectorModal() {
   if (modalMode === 'play') {
     if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-star"></i> Play Favorite Station';
     if (descEl) descEl.textContent = 'Choose a saved favorite to play directly on this speaker:';
+  } else if (modalMode === 'recent') {
+    if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i> Play Recent Station';
+    if (descEl) descEl.textContent = 'Choose a recently played station to play directly on this speaker:';
   } else {
     if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-star"></i> Select Favorite Station';
     if (descEl) descEl.textContent = 'Choose a saved favorite to assign to this preset button:';
   }
+
+  if (modalMode === 'recent') {
+    modalFavoritesList.innerHTML = '<div class="scan-loader"><div class="spinner"></div><p>Loading recent stations...</p></div>';
+    presetSelectModal.style.display = 'flex';
+
+    try {
+      const res = await window.api.getSpeakerRecents(activePlayTarget.ip);
+      modalFavoritesList.innerHTML = '';
+
+      if (!res || !res.success || !res.recents || res.recents.length === 0) {
+        const errorMsg = (res && !res.success && res.error) ? `<p style="font-size: 0.8rem; color: var(--color-danger); margin-top: 6px;">(${res.error})</p>` : '';
+        modalFavoritesList.innerHTML = `
+          <div class="empty-state" style="padding: 24px 0;">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <h3>No Recent Stations Found</h3>
+            <p>No recently played radio stations found on this speaker.</p>
+            ${errorMsg}
+          </div>`;
+        return;
+      }
+
+      res.recents.forEach(recent => {
+        const item = document.createElement('div');
+        item.className = 'modal-fav-item';
+
+        const streamUrl = recent.location || 'No Stream URL';
+        const buttonText = 'Play';
+
+        item.innerHTML = `
+          <div class="modal-fav-info">
+            <h4>${escapeHtml(recent.name)}</h4>
+            <span>${escapeHtml(streamUrl)}</span>
+          </div>
+          <button class="btn btn-secondary select-modal-fav" style="padding: 6px 12px; font-size: 0.75rem;">${buttonText}</button>`;
+
+        const btnPlay = item.querySelector('.select-modal-fav');
+        const playAction = async (e) => {
+          e.stopPropagation();
+          if (btnPlay.disabled) return;
+
+          btnPlay.disabled = true;
+          const originalText = btnPlay.textContent;
+          btnPlay.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+          try {
+            await window.api.playSpeakerRecent({
+              targetIp: activePlayTarget.ip,
+              name: recent.name,
+              location: recent.location,
+              source: recent.source,
+              type: recent.type,
+              sourceAccount: recent.sourceAccount,
+              isPresetable: recent.isPresetable
+            });
+            btnPlay.innerHTML = '<i class="fa-solid fa-circle-check" style="color: var(--color-success);"></i>';
+            setTimeout(() => {
+              btnPlay.disabled = false;
+              btnPlay.textContent = originalText;
+            }, 2000);
+          } catch (err) {
+            alert(`Failed to play recent station: ${err.message}`);
+            btnPlay.disabled = false;
+            btnPlay.textContent = originalText;
+          }
+        };
+
+        item.addEventListener('click', playAction);
+        modalFavoritesList.appendChild(item);
+      });
+    } catch (err) {
+      modalFavoritesList.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+    }
+    return;
+  }
+
 
   modalFavoritesList.innerHTML = '<div class="scan-loader"><div class="spinner"></div><p>Loading favorites...</p></div>';
   presetSelectModal.style.display = 'flex';

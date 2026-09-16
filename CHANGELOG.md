@@ -2,6 +2,11 @@
 
 All notable changes to the **BASSS** project will be documented in this file.
 
+## [1.0.5] - 2026-09-16
+
+- Add a **Play Recent** button to speaker dashboard cards, allowing users to view recently played streams from `GET /recents` on the Bose SoundTouch speaker and stream them directly via the preset selector modal.
+- Update dependencies to their latest compatible versions (`fast-xml-parser` to `5.11.1`, `express` to `4.22.3`, `electron` to `43.7.1`).
+
 ## [1.0.4] - 2026-08-14
 
 - Upgrade GitHub Actions `actions/checkout` (to `v6`) and `actions/setup-node` (to `v7`) in `release.yml` to resolve Node.js 20 deprecation warnings on the runners.

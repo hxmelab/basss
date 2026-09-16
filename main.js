@@ -939,6 +939,55 @@ ipcMain.handle('play-speaker-favorite', async (event, { targetIp, name, uuid }) 
   });
 });
 
+// IPC Handler to play a recent station directly on the speaker
+ipcMain.handle('play-speaker-recent', async (event, { targetIp, name, location, source = 'LOCAL_INTERNET_RADIO', type = 'stationurl', sourceAccount = '', isPresetable = 'true' }) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const host = formatTargetHost(targetIp);
+      if (!host) {
+        return reject(new Error('Invalid or missing IP address'));
+      }
+      const http = require('http');
+      const xml = `<ContentItem source="${escapeXml(source || 'LOCAL_INTERNET_RADIO')}" type="${escapeXml(type || 'stationurl')}" location="${escapeXml(location)}" sourceAccount="${escapeXml(sourceAccount || '')}" isPresetable="${escapeXml(String(isPresetable !== undefined ? isPresetable : 'true'))}">
+  <itemName>${escapeXml(name)}</itemName>
+</ContentItem>`;
+
+      const req = http.request({
+        hostname: host.startsWith('[') ? host.slice(1, -1) : host,
+        port: 8090,
+        path: '/select',
+        method: 'POST',
+        timeout: 3000,
+        headers: {
+          'Content-Type': 'application/xml',
+          'Content-Length': Buffer.byteLength(xml)
+        }
+      }, (response) => {
+        let body = '';
+        response.on('data', chunk => body += chunk);
+        response.on('end', () => {
+          if (response.statusCode >= 200 && response.statusCode < 300) {
+            resolve(body);
+          } else {
+            reject(new Error(`Speaker select returned status ${response.statusCode}`));
+          }
+        });
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error('Connection timed out'));
+      });
+      req.on('error', reject);
+      req.write(xml);
+      req.end();
+    } catch (err) {
+      reject(err);
+    }
+  });
+});
+
+
 
 // IPC Handlers for speaker preset reads/writes
 
@@ -1000,6 +1049,87 @@ ipcMain.handle('get-speaker-presets', async (event, targetIp) => {
     }
   });
 });
+
+ipcMain.handle('get-speaker-recents', async (event, targetIp) => {
+  return new Promise((resolve) => {
+    try {
+      const host = formatTargetHost(targetIp);
+      if (!host) {
+        return resolve({ success: false, error: 'Invalid or missing IP address' });
+      }
+      const http = require('http');
+      const req = http.get(`http://${host}:8090/recents`, { timeout: 3000 }, (res) => {
+        if (res.statusCode !== 200) {
+          resolve({ success: false, error: `Status ${res.statusCode}` });
+          return;
+        }
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          try {
+            const { XMLParser } = require('fast-xml-parser');
+            const parser = new XMLParser({ ignoreAttributes: false, parseTagValue: false });
+            const parsed = parser.parse(data);
+            const recentsList = [];
+            const seenLocations = new Set();
+
+            if (parsed && parsed.recents && parsed.recents.recent) {
+              let items = parsed.recents.recent;
+              if (!Array.isArray(items)) {
+                items = [items];
+              }
+              items.forEach(item => {
+                const ci = item.contentItem || item.ContentItem || {};
+                let itemName = '';
+                if (typeof ci.itemName === 'string') {
+                  itemName = ci.itemName;
+                } else if (ci.itemName && typeof ci.itemName === 'object' && ci.itemName['#text']) {
+                  itemName = ci.itemName['#text'];
+                }
+                const location = ci['@_location'] || '';
+                const source = ci['@_source'] || 'LOCAL_INTERNET_RADIO';
+                const type = ci['@_type'] || 'stationurl';
+                const sourceAccount = ci['@_sourceAccount'] || '';
+                const isPresetable = ci['@_isPresetable'] !== undefined ? ci['@_isPresetable'] : 'true';
+                const utcTime = item['@_utcTime'] || '';
+                const deviceID = item['@_deviceID'] || '';
+
+                if (itemName || location) {
+                  const dedupKey = location || itemName;
+                  if (!seenLocations.has(dedupKey)) {
+                    seenLocations.add(dedupKey);
+                    recentsList.push({
+                      name: itemName || 'Unknown Station',
+                      location,
+                      source,
+                      type,
+                      sourceAccount,
+                      isPresetable,
+                      utcTime,
+                      deviceID
+                    });
+                  }
+                }
+              });
+            }
+            resolve({ success: true, recents: recentsList });
+          } catch (e) {
+            resolve({ success: false, error: `Parse error: ${e.message}` });
+          }
+        });
+      });
+
+      req.on('error', (err) => resolve({ success: false, error: err.message }));
+      req.on('timeout', () => {
+        req.destroy();
+        resolve({ success: false, error: 'Timeout' });
+      });
+    } catch (err) {
+      resolve({ success: false, error: `Invalid URL: ${err.message}` });
+    }
+  });
+});
+
 
 ipcMain.handle('save-speaker-preset', async (event, { targetIp, presetId, name, location }) => {
   return new Promise((resolve, reject) => {
