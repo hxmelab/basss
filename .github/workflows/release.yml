@@ -1,4 +1,4 @@
-name: Release App
+name: Create Draft Release
 
 on:
   push:
@@ -10,8 +10,72 @@ permissions:
   contents: write
 
 jobs:
+  create-release:
+    name: Create Draft Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Create or update draft release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            TAG="${{ github.ref_name }}"
+            VERSION="${TAG#v}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            TAG="v$VERSION"
+          fi
+          TITLE="BASSS v$VERSION"
+
+          # Extract changelog notes for this version if available
+          VERSION_ENV="$VERSION" TITLE_ENV="$TITLE" node -e "
+            const fs = require('fs');
+            try {
+              const cl = fs.readFileSync('CHANGELOG.md', 'utf8');
+              const v = process.env.VERSION_ENV;
+              const title = process.env.TITLE_ENV;
+              const lines = cl.split('\n');
+              let capture = false;
+              let out = [];
+              for (const line of lines) {
+                if (line.startsWith('## [' + v + ']') || line.startsWith('## ' + v)) {
+                  capture = true;
+                  continue;
+                }
+                if (capture && line.startsWith('## ')) break;
+                if (capture) out.push(line);
+              }
+              const result = out.join('\n').trim();
+              fs.writeFileSync('release_notes.md', result || ('Release ' + title));
+            } catch (e) {
+              fs.writeFileSync('release_notes.md', 'Release ' + process.env.TITLE_ENV);
+            }
+          "
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, updating title and draft status..."
+            gh release edit "$TAG" --title "$TITLE" --notes-file release_notes.md --draft
+          else
+            echo "Creating draft release $TAG with title '$TITLE'..."
+            gh release create "$TAG" \
+              --draft \
+              --title "$TITLE" \
+              --notes-file release_notes.md \
+              --target "${{ github.sha }}"
+          fi
+
   release:
     name: Build & Publish Release
+    needs: create-release
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
